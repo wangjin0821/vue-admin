@@ -659,13 +659,8 @@ export default {
     },
     load() {
       getMenuList().then(res => {
-
-      }).catch(error => {
-
+        this.menuTree = res.data
       })
-      // sysApi.menuList().then(res => {
-      //   this.menuTree = res
-      // })
     }
   },
   created() {

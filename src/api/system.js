@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function getMenuList() {
   return request({
-    url: '/user/info',
+    url: '/system/menu/list',
     method: 'get'
   })
 }
