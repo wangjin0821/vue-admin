@@ -77,15 +77,15 @@ export default {
         if (valid) {
           this.loading = true
           this.$store.dispatch('Login', this.loginForm).then(() => {
-            this.$store.dispatch('GetInfo').then(
+            this.$store.dispatch('GetInfo').then(() => {
               this.loading = false
-            ).catch(() => {
+              this.$router.push({ path: '/' })
+            }).catch(() => {
               this.$store.dispatch('FedLogOut').then(() => {
                 Message.error('验证失败,请重新登录')
                 this.$router.push({ path: '/login' })
               })
             })
-            this.$router.push({ path: '/' })
           }).catch(() => {
             this.loading = false
           })

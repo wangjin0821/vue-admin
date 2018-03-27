@@ -1,5 +1,7 @@
 import { login, logout, getInfo } from '@/api/login'
 import { getToken, setToken, removeToken, getMenuList, setMenuList } from '@/utils/auth'
+import router from '@/router'
+import MenuUtils from '@/utils/MenuUtils'
 
 const user = {
   state: {
@@ -55,6 +57,13 @@ const user = {
           commit('SET_AVATAR', data.avatar)
           commit('SET_MENU_LIST', data.menuList)
           setMenuList(data.menuList)
+          const routes = []
+          MenuUtils(routes, data.menuList)
+          router.addRoutes(routes)
+          // router.options.routes.concat(routes)
+          routes.forEach((route) => {
+            router.options.routes.push(route)
+          })
           resolve(response)
         }).catch(error => {
           reject(error)

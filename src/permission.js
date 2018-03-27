@@ -4,17 +4,17 @@ import NProgress from 'nprogress' // Progress 进度条
 import 'nprogress/nprogress.css'// Progress 进度条样式
 import { Message } from 'element-ui'
 import { getToken } from '@/utils/auth' // 验权
-import MenuUtils from '@/utils/MenuUtils'
+// import MenuUtils from '@/utils/MenuUtils'
 
-const data = store.getters.menuList
-if (data) {
-  // console.log(data)
-  // 这里是防止用户手动刷新页面，整个app要重新加载,动态新增的路由，会消失，所以我们重新add一次
-  const routes = []
-  MenuUtils(routes, data)
-  router.addRoutes(routes)
-  router.options.routes.push(routes[0])
-}
+// const data = store.getters.menuList
+// if (data) {
+// console.log(data)
+// 这里是防止用户手动刷新页面，整个app要重新加载,动态新增的路由，会消失，所以我们重新add一次
+// const routes = []
+// MenuUtils(routes, data)
+// router.addRoutes(routes)
+// router.options.routes.push(routes[0])
+// }
 
 const whiteList = ['/login'] // 不重定向白名单
 router.beforeEach((to, from, next) => {
