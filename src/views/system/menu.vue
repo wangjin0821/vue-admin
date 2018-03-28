@@ -1,8 +1,8 @@
 <template>
   <imp-panel>
     <h3 class="box-title" slot="header" style="width: 100%;">
-      <el-button type="primary" icon="plus" @click="newAdd">新增</el-button>
-      <el-button type="danger" icon="delete" @click="batchDelete">删除</el-button>
+      <el-button type="primary" icon="plus" @click="newAdd" :liading="newLoading">新增</el-button>
+      <el-button type="danger" icon="delete" @click="batchDelete" :loading="batchDelLoading">删除</el-button>
     </h3>
     <el-row slot="body" :gutter="24" style="margin-bottom: 20px;">
       <el-col :span="6" :xs="24" :sm="24" :md="6" :lg="6" style="margin-bottom: 20px;">
@@ -12,12 +12,12 @@
                   show-checkbox
                   highlight-current
                   :render-content="renderContent"
-                  @node-click="handleNodeClick" clearable node-key="id" :props="defaultProps"></el-tree>
+                  @node-click="handleNodeClick" clearable node-key="id" :props="defaultProps" v-loading="menuLoading"></el-tree>
       </el-col>
       <el-col :span="18" :xs="24" :sm="24" :md="18" :lg="18">
         <el-card class="box-card">
           <div class="text item">
-            <el-form :model="form" ref="form">
+            <el-form :model="form" ref="form" :rules="rules">
               <el-form-item label="父级" :label-width="formLabelWidth">
                 <!--<el-input v-model="form.parentId" auto-complete="off"></el-input>-->
                 <el-select-tree v-model="form.parentId" :treeData="menuTree" :propNames="defaultProps" clearable
@@ -42,8 +42,8 @@
                 <el-slider v-model="form.sort"></el-slider>
               </el-form-item>
               <el-form-item label="" :label-width="formLabelWidth">
-                <el-button type="primary" @click="onSubmit" v-text="form.id?'修改':'新增'"></el-button>
-                <el-button type="danger" @click="deleteSelected" icon="delete" v-show="form.id && form.id!=null">删除
+                <el-button type="primary" @click="onSubmit" v-text="form.id?'修改':'新增'" :loading="addLoading"></el-button>
+                <el-button type="danger" @click="deleteSelected" icon="delete" v-show="form.id && form.id!=null" :loading="delLoading">删除
                 </el-button>
               </el-form-item>
             </el-form>
@@ -524,7 +524,7 @@ import panel from '@/components/Panel'
 import selectTree from '@/components/SelectTree'
 import treeter from '@/utils/treeter'
 import merge from 'element-ui/src/utils/merge'
-import { getMenuList } from '@/api/system'
+import { getMenuList, deleteMenu, saveMenu } from '@/api/system'
 
 export default {
   mixins: [treeter],
@@ -534,8 +534,13 @@ export default {
   },
   data() {
     return {
+      newLoading: false,
+      batchDelLoading: false,
+      menuLoading: false,
+      delLoading: false,
+      addLoading: false,
       selectIconDialog: false,
-      formLabelWidth: '100px',
+      formLabelWidth: '80px',
       defaultProps: {
         children: 'children',
         label: 'name',
@@ -553,6 +558,10 @@ export default {
         delivery: false,
         parentId: null,
         desc: ''
+      },
+      rules: {
+        name: [{ required: true, trigger: 'blur' }],
+        isShow: [{ required: true, trigger: 'blur' }]
       }
     }
   },
@@ -583,44 +592,68 @@ export default {
       }
     },
     deleteSelected() {
-      // this.$http.get(api.SYS_MENU_DELETE + "?menuIds=" + this.form.id)
-      //   .then(res => {
-      //     this.$message('操作成功')
-      //     this.deleteFromTree(this.menuTree, this.form.id)
-      //     this.newAdd()
-      //   }).catch(e => {
-      //   this.$message('操作成功')
-      //   this.deleteFromTree(this.menuTree, this.form.id)
-      //   this.newAdd()
-      // })
+      this.delLoading = true
+      deleteMenu({ menu_ids:[this.form.id] }).then(res => {
+          this.delLoading = false
+          if (res.data.status) {
+            this.$message(res.data.message)
+            this.load()
+          } else {
+            reject(res.data.message)
+          }
+      }).catch((error) => {
+        this.delLoading = false
+        this.$message.error(error)
+      })
     },
     batchDelete() {
       const checkKeys = this.$refs.menuTree.getCheckedKeys()
       if (checkKeys == null || checkKeys.length <= 0) {
         this.$message.warning('请选择要删除的资源')
-        return
+        return false
       }
       this.$confirm('确定删除?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        // this.$http.get(api.SYS_MENU_DELETE + "?menuIds=" + checkKeys.join(','))
-        //   .then(res => {
-        //     this.$message('操作成功')
-        //     this.load()
-        //   }).catch(e => {
-        //   this.$message('操作成功')
-        //   this.batchDeleteFromTree(this.menuTree, checkKeys)
-        // })
+        this.batchDelLoading = true
+        deleteMenu({ menu_ids: checkKeys }).then(res => {
+          this.batchDelLoading = false
+          if (res.data.status) {
+            this.$message(res.data.message)
+            this.load()
+          } else {
+            reject(res.data.message)
+          }
+        }).catch((error) => {
+          this.batchDelLoading = false
+          this.$message.error(error)
+        })
       })
-
     },
     handleNodeClick(data) {
       this.form = merge({}, data)
     },
     onSubmit() {
-      if (this.form.id == null) {
+      this.$refs.form.validate(valid => {
+        if (valid) {
+          this.addLoading = true
+          saveMenu(this.form).then((res) => {
+            this.addLoading = false
+            if (res.data.status) {
+              this.$message(res.data.message)
+              this.load()
+            } else {
+              reject(res.data.message)
+            }
+          }).catch((error) => {
+            this.addLoading = false
+            this.$message.error(error)
+          })
+        }
+      })
+      // if (this.form.id == null) {
         // this.$http.post(api.SYS_MENU_ADD, this.form)
         //   .then(res => {
         //     this.$message('操作成功')
@@ -646,7 +679,7 @@ export default {
         //   this.menuTree.push({})
         //   this.menuTree.pop()
         // })
-      } else {
+      // } else {
         // this.$http.post(api.SYS_MENU_UPDATE, this.form)
         //   .then(res => {
         //     this.$message('操作成功')
@@ -655,12 +688,16 @@ export default {
         //   this.$message('操作成功')
         //   this.updateTreeNode(this.menuTree, merge({}, this.form))
         // })
-      }
+      // }
     },
     load() {
+      this.menuLoading = true
       getMenuList().then(res => {
+        this.menuLoading = false
         this.menuTree = res.data
-      })
+      }).catch(
+        this.menuLoading = false
+      )
     }
   },
   created() {

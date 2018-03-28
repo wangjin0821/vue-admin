@@ -25,7 +25,7 @@ router.beforeEach((to, from, next) => {
     } else {
       if (!store.getters.name) {
         store.dispatch('GetInfo').then(res => { // 拉取用户信息
-          next()
+          next({ path: '/' })
         }).catch(() => {
           store.dispatch('FedLogOut').then(() => {
             Message.error('验证失败,请重新登录')

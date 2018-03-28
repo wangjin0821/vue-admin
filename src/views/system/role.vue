@@ -3,7 +3,6 @@
     <h3 class="box-title" slot="header" style="width: 100%;">
       <el-button type="primary" icon="plus" @click="newAdd">新增</el-button>
       <el-button type="danger" icon="delete" @click="batchDelete">删除</el-button>
-
     </h3>
     <el-row slot="body" :gutter="24" style="margin-bottom: 20px;">
       <el-col :span="6" :xs="24" :sm="24" :md="6" :lg="6" style="margin-bottom: 20px;">
@@ -48,7 +47,6 @@
             </el-form>
           </div>
         </el-card>
-
         <el-dialog title="配置资源" v-model="dialogVisible" size="tiny">
           <div class="select-tree">
           <el-scrollbar
@@ -75,12 +73,12 @@
       </el-col>
     </el-row>
   </imp-panel>
-
 </template>
 <script>
 import panel from '@/components/Panel'
 import selectTree from '@/components/SelectTree'
 import treeter from '@/utils/treeter'
+import { getRoleList } from '@/api/system'
 
 export default {
   mixins: [treeter],
@@ -193,10 +191,12 @@ export default {
       // })
     },
     load() {
-      // sysApi.roleList().then(res => {
-      //     this.roleTree = []
-      //     this.roleTree.push(...res)
-      //   })
+      getRoleList().then(res => {
+        this.roleTree = []
+        this.roleTree.push(...res.data.list)
+      }).catch(error => {
+        this.$message.error(error)
+      })
     },
     renderContent(h, { node, data, store }) {
       return (
