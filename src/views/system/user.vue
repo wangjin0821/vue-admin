@@ -4,7 +4,7 @@
         <h3 class="box-title" slot="header" style="width: 100%;">
           <el-row style="width: 100%;">
             <el-col :span="12">
-                <el-button type="primary" icon="plus" @click="add">新增</el-button>
+              <el-button type="primary" icon="el-icon-plus" @click="add">新增</el-button>
               <!-- <router-link :to="{ path: 'userAdd'}">
                 
               </router-link> -->
@@ -33,7 +33,7 @@
             <el-table-column
               label="照片" width="76">
               <template slot-scope="scope">
-                <img :src='scope.row.avatar' style="height: 35px;vertical-align: middle;" alt="">
+                <img :src='scope.row.avater' style="height: 35px;vertical-align: middle;" alt="">
               </template>
             </el-table-column>
             <el-table-column
@@ -41,16 +41,12 @@
               label="名称">
             </el-table-column>
             <el-table-column
-              prop="userName"
+              prop="user_name"
               label="登录用户名">
             </el-table-column>
             <el-table-column
-              prop="passWord"
-              label="登录密码">
-            </el-table-column>
-            <el-table-column
-              prop="email"
-              label="邮箱">
+              prop="telphone"
+              label="手机号">
             </el-table-column>
             <el-table-column
               label="状态">
@@ -114,30 +110,82 @@
           <el-button type="primary" @click="configUserRoles">确 定</el-button>
           </span>
       </el-dialog>
-      <el-dialog title="外层 Dialog" :visible.sync="outerVisible">
-        fsdafasdfsaddfa
+      <el-dialog title="新增用户" :visible.sync="addVisible">
+        <div>
+          <el-form ref="addForm" :model="addForm" :rules="addFormRules" label-width="120px">
+            <el-form-item label="姓名" prop="name">
+              <el-input v-model="addForm.name"></el-input>
+            </el-form-item>
+            <el-form-item label="登录用户名" prop="user_name">
+              <el-input name="user_name" v-model="addForm.user_name"></el-input>
+            </el-form-item>
+            <el-form-item label="登录密码" prop="pass_word">
+              <el-input type="password" v-model="addForm.pass_word"></el-input>
+            </el-form-item>
+            <el-form-item label="手机号码">
+                <el-input v-model="addForm.telphone"></el-input>
+            </el-form-item>
+            <el-form-item label="状态">
+              <el-switch v-model="addForm.status"></el-switch>
+            </el-form-item>
+          </el-form>
+        </div>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="outerVisible = false">取 消</el-button>
-          <el-button type="primary" @click="innerVisible = true">打开内层 Dialog</el-button>
+          <el-button @click="addVisible = false">取 消</el-button>
+          <el-button type="primary" @click="saveUser" :loading="saveLoading">保 存</el-button>
         </div>
       </el-dialog>
+      <el-dialog title="编辑用户" :visible.sync="editVisible">
+          <div>
+            <el-form ref="editForm" :model="editForm" :rules="addFormRules" label-width="120px">
+              <el-form-item label="姓名" prop="name">
+                <el-input v-model="editForm.name"></el-input>
+              </el-form-item>
+              <el-form-item label="登录用户名" prop="user_name">
+                <el-input name="user_name" v-model="editForm.user_name"></el-input>
+              </el-form-item>
+              <el-form-item label="登录密码" prop="pass_word">
+                <el-input type="password" v-model="editForm.pass_word"></el-input>
+              </el-form-item>
+              <el-form-item label="手机号码">
+                  <el-input v-model="editForm.telphone"></el-input>
+              </el-form-item>
+              <el-form-item label="状态">
+                <el-switch v-model="editForm.status"></el-switch>
+              </el-form-item>
+            </el-form>
+          </div>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="editVisible = false">取 消</el-button>
+            <el-button type="primary" @click="editUser" :loading="saveLoading">保 存</el-button>
+          </div>
+        </el-dialog>
   </div>
 </template>
 
 <script>
 import panel from '@/components/Panel'
-import { getUserList, deleteUser, updateUserRole, getUserRoles, getRoleList } from '@/api/system'
+import { getUserList, deleteUser, addUser, updateUser, updateUserRole, getUserRoles, getRoleList } from '@/api/system'
 
 export default {
   components: {
     'imp-panel': panel
   },
   data() {
+    const validatePass = (rule, value, callback) => {
+      if (value.length < 6) {
+        callback(new Error('密码不能小于6位'))
+      } else {
+        callback()
+      }
+    }
     return {
       currentRow: {},
       dialogVisible: false,
+      addVisible: false,
+      editVisible: false,
       dialogLoading: false,
-      outerVisible: false,
+      saveLoading: false,
       defaultProps: {
         children: 'children',
         label: 'name',
@@ -154,12 +202,83 @@ export default {
           parentId: 0
         },
         rows: []
+      },
+      addForm: {
+        name: '',
+        user_name: '',
+        pass_word: '',
+        telphone: '',
+        status: 0
+      },
+      addFormRules: {
+        name: [{ required: true, trigger: 'blur' }],
+        user_name: [{ required: true, trigger: 'blur' }],
+        pass_word: [{ required: true, trigger: 'blur', validator: validatePass }]
+      },
+      editForm: {
+        id: '',
+        name: '',
+        user_name: '',
+        pass_word: '',
+        telphone: '',
+        status: 0
       }
     }
   },
   methods: {
     add() {
-      this.outerVisible = true
+      this.addForm = {
+        name: '',
+        user_name: '',
+        pass_word: '',
+        telphone: '',
+        status: 0
+      }
+      this.addVisible = true
+    },
+    saveUser() {
+      this.$refs.addForm.validate(valid => {
+        if (valid) {
+          this.saveLoading = true
+          addUser({ addUser: this.addForm }).then(res => {
+            this.saveLoading = false
+            this.addVisible = false
+            if (res.data.status) {
+              this.$message(res.data.message)
+              this.loadData()
+            } else {
+              reject(res.data.message)
+            }
+          }).catch(error => {
+            this.saveLoading = false
+            this.$message.error(error)
+          })
+        } else {
+          console.log('error submit!!')
+          return false
+        }
+      })
+    },
+    editUser() {
+      this.$refs.editForm.validate(valid => {
+        if (valid) {
+          this.saveLoading = true
+          updateUser({ updateUser: this.editForm }).then(res => {
+            this.saveLoading = false
+            this.editVisible = false
+            if (res.data.status) {
+              this.$message(res.data.message)
+              this.loadData()
+            } else {
+              reject(res.data.message)
+            }
+          }).catch(error => {
+            this.$message.error(error)
+          })
+        } else {
+          return false
+        }
+      })
     },
     search(target) {
       this.loadData()
@@ -205,11 +324,14 @@ export default {
       this.loadData()
     },
     handleEdit(index, row) {
-      this.$router.push({
-        path: 'userAdd', query: {
-          id: row.id
-        }
-      })
+      this.editVisible = true
+      this.editForm = {...row}
+      // console.log(row)
+      // this.$router.push({
+      //   path: 'userAdd', query: {
+      //     id: row.id
+      //   }
+      // })
     },
     handleDelete(index, row) {
       deleteUser({ userIds: [row.id] }).then(res => {

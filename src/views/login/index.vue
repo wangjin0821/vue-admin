@@ -53,11 +53,11 @@ export default {
     }
     return {
       loginForm: {
-        username: 'admin',
-        password: 'admin'
+        username: '',
+        password: ''
       },
       loginRules: {
-        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
+        username: [{ required: true, trigger: 'blur' }],
         password: [{ required: true, trigger: 'blur', validator: validatePass }]
       },
       loading: false,
@@ -86,8 +86,9 @@ export default {
                 this.$router.push({ path: '/login' })
               })
             })
-          }).catch(() => {
+          }).catch((error) => {
             this.loading = false
+            Message.error(error)
           })
         } else {
           console.log('error submit!!')

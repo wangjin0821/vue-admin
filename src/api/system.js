@@ -47,6 +47,22 @@ export function deleteUser(params) {
   })
 }
 
+export function addUser(params) {
+  return request({
+    url: '/system/user/add',
+    method: 'post',
+    data: params
+  })
+}
+
+export function updateUser(params) {
+  return request({
+    url: '/system/user/update',
+    method: 'post',
+    data: params
+  })
+}
+
 export function updateUserRole(params) {
   return request({
     url: '/system/user/updateRole',

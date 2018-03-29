@@ -38,9 +38,13 @@ const user = {
         login(username, userInfo.password).then(response => {
           // console.log(response.data)
           const data = response.data
-          setToken(data.token)
-          commit('SET_TOKEN', data.token)
-          resolve()
+          if (data.status) {
+            setToken(data.token)
+            commit('SET_TOKEN', data.token)
+            resolve()
+          } else {
+            reject(data.message)
+          }
         }).catch(error => {
           reject(error)
         })
