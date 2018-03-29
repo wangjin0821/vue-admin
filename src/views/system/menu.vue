@@ -659,9 +659,10 @@ export default {
       getMenuList().then(res => {
         this.menuLoading = false
         this.menuTree = res.data
-      }).catch(
+      }).catch(error => {
+        this.$message.error(error)
         this.menuLoading = false
-      )
+      })
     }
   },
   created() {

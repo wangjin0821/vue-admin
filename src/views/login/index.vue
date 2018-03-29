@@ -31,19 +31,19 @@
 </template>
 
 <script>
-import { isvalidUsername } from '@/utils/validate'
+// import { isvalidUsername } from '@/utils/validate'
 import { Message } from 'element-ui'
 
 export default {
   name: 'login',
   data() {
-    const validateUsername = (rule, value, callback) => {
-      if (!isvalidUsername(value)) {
-        callback(new Error('请输入正确的用户名'))
-      } else {
-        callback()
-      }
-    }
+    // const validateUsername = (rule, value, callback) => {
+    //   if (!isvalidUsername(value)) {
+    //     callback(new Error('请输入正确的用户名'))
+    //   } else {
+    //     callback()
+    //   }
+    // }
     const validatePass = (rule, value, callback) => {
       if (value.length < 5) {
         callback(new Error('密码不能小于5位'))
