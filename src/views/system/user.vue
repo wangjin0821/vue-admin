@@ -41,7 +41,7 @@
               label="名称">
             </el-table-column>
             <el-table-column
-              prop="user_name"
+              prop="userName"
               label="登录用户名">
             </el-table-column>
             <el-table-column
@@ -116,11 +116,11 @@
             <el-form-item label="姓名" prop="name">
               <el-input v-model="addForm.name"></el-input>
             </el-form-item>
-            <el-form-item label="登录用户名" prop="user_name">
-              <el-input name="user_name" v-model="addForm.user_name"></el-input>
+            <el-form-item label="登录用户名" prop="userName">
+              <el-input name="userName" v-model="addForm.userName"></el-input>
             </el-form-item>
-            <el-form-item label="登录密码" prop="pass_word">
-              <el-input type="password" v-model="addForm.pass_word"></el-input>
+            <el-form-item label="登录密码" prop="passWord">
+              <el-input type="passWord" v-model="addForm.passWord"></el-input>
             </el-form-item>
             <el-form-item label="手机号码">
                 <el-input v-model="addForm.telphone"></el-input>
@@ -141,11 +141,11 @@
               <el-form-item label="姓名" prop="name">
                 <el-input v-model="editForm.name"></el-input>
               </el-form-item>
-              <el-form-item label="登录用户名" prop="user_name">
-                <el-input name="user_name" v-model="editForm.user_name"></el-input>
+              <el-form-item label="登录用户名" prop="userName">
+                <el-input name="userName" v-model="editForm.userName"></el-input>
               </el-form-item>
-              <el-form-item label="登录密码" prop="pass_word">
-                <el-input type="password" v-model="editForm.pass_word"></el-input>
+              <el-form-item label="登录密码" prop="passWord">
+                <el-input type="passWord" v-model="editForm.passWord"></el-input>
               </el-form-item>
               <el-form-item label="手机号码">
                   <el-input v-model="editForm.telphone"></el-input>
@@ -205,21 +205,21 @@ export default {
       },
       addForm: {
         name: '',
-        user_name: '',
-        pass_word: '',
+        userName: '',
+        passWord: '',
         telphone: '',
         status: 0
       },
       addFormRules: {
         name: [{ required: true, trigger: 'blur' }],
-        user_name: [{ required: true, trigger: 'blur' }],
-        pass_word: [{ required: true, trigger: 'blur', validator: validatePass }]
+        userName: [{ required: true, trigger: 'blur' }],
+        passWord: [{ required: true, trigger: 'blur', validator: validatePass }]
       },
       editForm: {
         id: '',
         name: '',
-        user_name: '',
-        pass_word: '',
+        userName: '',
+        passWord: '',
         telphone: '',
         status: 0
       }
@@ -229,8 +229,8 @@ export default {
     add() {
       this.addForm = {
         name: '',
-        user_name: '',
-        pass_word: '',
+        userName: '',
+        passWord: '',
         telphone: '',
         status: 0
       }
@@ -243,12 +243,8 @@ export default {
           addUser({ addUser: this.addForm }).then(res => {
             this.saveLoading = false
             this.addVisible = false
-            if (res.data.status) {
-              this.$message(res.data.message)
-              this.loadData()
-            } else {
-              reject(res.data.message)
-            }
+            this.$message(res.data.message)
+            this.loadData()
           }).catch(error => {
             this.saveLoading = false
             this.$message.error(error)
@@ -266,12 +262,8 @@ export default {
           updateUser({ updateUser: this.editForm }).then(res => {
             this.saveLoading = false
             this.editVisible = false
-            if (res.data.status) {
-              this.$message(res.data.message)
-              this.loadData()
-            } else {
-              reject(res.data.message)
-            }
+            this.$message(res.data.message)
+            this.loadData()
           }).catch(error => {
             this.$message.error(error)
           })
@@ -306,11 +298,7 @@ export default {
         const checkedKeys = this.$refs.roleTree.getCheckedKeys()
         updateUserRole({ userId: this.currentRow.id, roleIds: checkedKeys }).then(res => {
           this.dialogVisible = false
-          if (res.data.status) {
-            this.$message(res.data.message)
-          } else {
-            reject(res.data.message)
-          }
+          this.$message(res.data.message)
         }).catch(error => {
           this.$message.error(error)
         })
@@ -348,13 +336,16 @@ export default {
     loadData() {
       this.listLoading = true
       getUserList({
-        key: this.searchKey,
-        pageSize: this.tableData.pagination.pageSize,
-        pageNo: this.tableData.pagination.pageNo
+        userName: this.searchKey,
+        pagination : {
+          size: this.tableData.pagination.pageSize,
+          current: this.tableData.pagination.pageNo
+        }
       }).then(res => {
         this.listLoading = false
-        this.tableData.rows = res.data.userList
-        this.tableData.pagination.total = res.data.total
+        this.tableData.rows = res.data.list
+        this.tableData.pagination.total = res.data.totalCount
+        // this.tableData.pagination.pageSize = res.data.totalPage
       }).catch(error => {
         this.listLoading = false
         this.$message.error(error)

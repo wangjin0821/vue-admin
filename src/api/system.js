@@ -33,9 +33,9 @@ export function updateMenu(params) {
 
 export function getUserList(params) {
   return request({
-    url: '/system/user/list',
-    method: 'get',
-    params
+    url: '/user/list',
+    method: 'post',
+    data: params
   })
 }
 

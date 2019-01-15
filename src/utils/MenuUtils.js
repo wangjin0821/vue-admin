@@ -16,6 +16,7 @@ function generaMenu(routers, data) {
       menu.children = []
       generaMenu(menu.children, item.children)
     }
+    console.log(menu)
     routers.push(menu)
   })
 }
